@@ -1,0 +1,38 @@
+version: '3.7'
+
+services:
+  webapp:
+    image: webapp:latest
+    ports:
+      - "8082:80"  # Change the external port to 8082
+    deploy:
+      replicas: 3
+      resources:
+        limits:
+          cpus: '0.50'
+          memory: 50M
+    networks:
+      - webapp
+
+  locust:
+    image: locust:latest
+    ports:
+      - "8089:8089"
+    deploy:
+      replicas: 1
+    networks:
+      - webapp
+
+  cockroachdb:
+    image: cockroachdb/cockroach:latest
+    command: start --insecure --listen-addr=0.0.0.0 --advertise-addr=192.168.0.157 --join=cockroachdb
+    ports:
+      - "26258:26257"  # Change the external port to 26258 for SQL
+      - "8081:8080"    # Change the external port to 8081 for the Admin UI
+    networks:
+      - webapp
+
+networks:
+  webapp:
+    external: true
+
